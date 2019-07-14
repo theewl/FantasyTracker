@@ -1,0 +1,36 @@
+{
+	"name": "Basketball Fantasy Tools",
+	"version": "1.0",
+	"description": "All-in-one basketball fantasy tool",
+	"manifest_version": 2,
+
+	//For background.js
+	"permissions": ["http://localhost/*","declarativeContent","storage","activeTab",
+	    "<all_urls>"],
+
+	//For popup.html
+	"browser_action":
+	{
+		"default_popup": "news.html",
+		"default_icon":
+		{
+			"16": "icon16.png",
+			"32": "icon32.png",
+			"48": "icon48.png",
+			"128": "icon128.png"
+		}
+	},
+
+	"background":
+	{
+		"scripts": ["background.js"],
+		"persistent": false
+	},
+
+	"icons": 
+	{
+		"16": "icon16.png",
+		"32": "icon32.png",
+		"48": "icon48.png",
+		"128": "icon128.png"	}
+}

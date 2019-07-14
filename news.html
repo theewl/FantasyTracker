@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+}
+
+li a {
+  display: block;
+  color: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+li a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+li a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+</style>
+
+</head>
+<body>
+
+<button id="addTeamBtn">Add Fantasy Team</button>
+
+<h2>YOUR TEAM</h2>
+<table id="myTable">
+	<tr>
+		<td><b>Names<b></td>
+		<td><b>Stats</b></td>
+		<td><b>News</b></td>
+
+
+	</tr>
+</table>
+
+
+</body>
+<script src="nbaAPI.js"></script>
+
+</html>
