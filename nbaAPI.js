@@ -12,7 +12,9 @@ var playersRealName
 var playersID
 var playersPts
 var csvData = new Array();
-
+var firstNameArr = []
+var lastNameArr = []
+var globalCtr = 0;
 
 //Used to get average season stats from a player
 function getPlayerAVG(url) 
@@ -29,7 +31,7 @@ function getPlayerAVG(url)
 		  {
 		  	//Get specific average stats...
 	    	playersPts = JSON.parse(request.response).data["0"]["pts"];
-	    	console.log(playersPts)
+	    	//console.log(playersPts)
 
 	    	//Send stats to public scope
 	    	resolve(playersPts)
@@ -51,32 +53,40 @@ function getPlayerAVG(url)
 }
 
 //Used to get player's ID from local csv file
-function getPlayerID(path)
+function getPlayerID(path, firstName, lastName)
 {
+	firstNameArr.push(firstName)
+	lastNameArr.push(lastName)
 	return new Promise(function(resolve, reject)
 	{
+
 		let request = new XMLHttpRequest();  
+
 		request.onload = function() 
 		{
+
  			//Converts csv file into an array
 			var jsonObject = request.responseText.split(/\r?\n|\r/);
 			for (var i = 0; i < jsonObject.length; i++) 
 			{
 			  csvData.push(jsonObject[i].split(','));
 			}
-
 			// Retrived data from csv file content
-			for(var x = 0; x < 3200; x++)
+			for(var x = 0; x < jsonObject.length - 1; x++)
 			{
+
 				//Compare player's full name and returns player's ID
-				if(csvData[x][1].replace(/['"]+/g, '') == players_first && csvData[x][2].replace(/['"]+/g, '') == players_last)
+				if(csvData[x][1].replace(/['"]+/g, '') == firstNameArr[globalCtr] && csvData[x][2].replace(/['"]+/g, '') == lastNameArr[globalCtr])
 				{
-					console.log("PLAYER ID: " + csvData[x][10])
+
+					//console.log("PLAYER ID: " + csvData[x][10])
 					playersID = csvData[x][10]	
 					resolve(playersID)
+					
+					
 				}
 			}
-			
+			globalCtr++
 		};
 
 		request.onerror = () => 
@@ -85,6 +95,7 @@ function getPlayerID(path)
 		};
 		request.open("GET", path);   
 		request.send(); 
+
   });
 
 }
@@ -140,9 +151,8 @@ document.getElementById("addTeamBtn").addEventListener('click', () =>
 		}
 
 		//This section is to add information to the database
-		//Send player first name, player last name, numOfPlayers2 on roster, specific live stats
+		//Send player first name, player last name, numOfPlayers3 on roster, specific live stats
 
-		//Clears exisiting database
 		var storage = chrome.storage.sync;
 		for(var i = 0; i < numberPlayers; i++)
 		{
@@ -161,58 +171,46 @@ document.getElementById("addTeamBtn").addEventListener('click', () =>
 	});
 });
 
+
 //chrome.storage.sync.clear()
 chrome.storage.sync.get(null, function(items) 
 {
 
     var allKeys = Object.keys(items);
-    numOfPlayers2 = items[allKeys[allKeys.length -1]]
-    
-	for(var rows = 0; rows < numOfPlayers2; rows++)
+    numOfPlayers3 = items[allKeys[allKeys.length -1]]
+    var counter = 1
+	for(var rows = 0; rows < numOfPlayers3; rows++)
 	{
 	  var table = document.getElementById("myTable");
 	  var row = table.insertRow(-1);
 	  var cell1 = row.insertCell(0);
-	  var cell2 = row.insertCell(-1);
-	  var cell3 = row.insertCell(-1);
+	  var cell2 = row.insertCell(1);
+	  var cell3 = row.insertCell(2);
+	  
 	  cell1.innerHTML = items[allKeys[rows]];
-	  cell2.innerHTML = "Pts: 22.5"
+	  cell2.innerHTML = "Player's PPG"
 	  cell3.innerHTML = "Traded!"
 	  players.push(items[allKeys[rows]])
-	}
-
-	console.log(players)
-	
-
-		players_first = players[0].substr(0, players[0].indexOf(' '))
-		players_last = players[0].substr(players[0].indexOf(' ') + 1, players[0].length - 1)
+	}	
+	for(var theCTR = 0; theCTR < numOfPlayers3; theCTR++)
+	{
+		players_first = players[theCTR].substr(0, players[theCTR].indexOf(' '))
+		players_last = players[theCTR].substr(players[theCTR].indexOf(' ') + 1, players[theCTR].length - 1)
 		//Get player's ID and any information about them
-		getPlayerID('NBA_Data.csv').then(function(result)
+		getPlayerID('NBA_Data.csv', players_first, players_last).then(function(result)
 		{
+			//console.log(result)
 			var url = 'https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=' + result
 
 			//Get player's season averages
 			getPlayerAVG(url).then(function(result) 
-		  {
-		    console.log("Pts: " + result)
-		    /*
-			var storage = chrome.storage.sync;
-			for(var i = 0; i < numberPlayers; i++)
-			{
-				var name = 'name' + i
-
-				var obj= {};
-
-				obj[name] = players[i];
-				//console.log(obj)
-
-				storage.set(obj);
-		    }
-		    storage.set({numPlayers: numberPlayers})
-			*/
+		  	{
+				document.getElementById("myTable").rows[counter].cells[1].innerHTML = "PPG: " + result
+				counter++
+			
 		  })
 		});
-	
+	}
 });
 
 
