@@ -15,42 +15,8 @@ var csvData = new Array();
 var firstNameArr = []
 var lastNameArr = []
 var globalCtr = 0;
+var avgPTS = [];
 
-//Used to get average season stats from a player
-function getPlayerAVG(url) 
-{
-  return new Promise(function(resolve, reject) 
-  {
-	let request = new XMLHttpRequest();   
-	
-	//When request is sent back...
-	request.onload = function() 
-	{
-		  //Checks to see if request is successful 
-      	  if (request.readyState === XMLHttpRequest.DONE && request.status === 200) 
-		  {
-		  	//Get specific average stats...
-	    	playersPts = JSON.parse(request.response).data["0"]["pts"];
-	    	//console.log(playersPts)
-
-	    	//Send stats to public scope
-	    	resolve(playersPts)
-		    
-		  } 
-
-    };
-    //error checking
-    request.onerror = () => 
-	{
-	  console.log("error")
-	};
-
-	//GET request
-    request.open('GET', url);
-    //Sends request to API
-    request.send();
-  });
-}
 
 //Used to get player's ID from local csv file
 function getPlayerID(path, firstName, lastName)
@@ -64,7 +30,6 @@ function getPlayerID(path, firstName, lastName)
 
 		request.onload = function() 
 		{
-
  			//Converts csv file into an array
 			var jsonObject = request.responseText.split(/\r?\n|\r/);
 			for (var i = 0; i < jsonObject.length; i++) 
@@ -99,7 +64,6 @@ function getPlayerID(path, firstName, lastName)
   });
 
 }
-
 
 //Needs to go through database and check for name in webpage, once it finds a name, it will add to roster
 //Add roster to database
@@ -179,6 +143,7 @@ chrome.storage.sync.get(null, function(items)
     var allKeys = Object.keys(items);
     numOfPlayers3 = items[allKeys[allKeys.length -1]]
     var counter = 1
+    var counter2 = 1
 	for(var rows = 0; rows < numOfPlayers3; rows++)
 	{
 	  var table = document.getElementById("myTable");
@@ -186,9 +151,12 @@ chrome.storage.sync.get(null, function(items)
 	  var cell1 = row.insertCell(0);
 	  var cell2 = row.insertCell(1);
 	  var cell3 = row.insertCell(2);
+	  var cell4 = row.insertCell(3);
+	  var cell5 = row.insertCell(4);
+
 	  
-	  cell1.innerHTML = items[allKeys[rows]];
-	  cell2.innerHTML = "Player's PPG"
+	  cell1.innerHTML = "ID"
+	  cell2.innerHTML = items[allKeys[rows]];
 	  cell3.innerHTML = "Traded!"
 	  players.push(items[allKeys[rows]])
 	}	
@@ -199,19 +167,90 @@ chrome.storage.sync.get(null, function(items)
 		//Get player's ID and any information about them
 		getPlayerID('NBA_Data.csv', players_first, players_last).then(function(result)
 		{
-			//console.log(result)
 			var url = 'https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=' + result
+			document.getElementById("myTable").rows[counter2].cells[0].innerHTML = result
+			counter2++
+			//console.log(result)
 
-			//Get player's season averages
-			getPlayerAVG(url).then(function(result) 
-		  	{
-				document.getElementById("myTable").rows[counter].cells[1].innerHTML = "PPG: " + result
-				counter++
-			
-		  })
+		  //Get player's season averages
+		  fetch(url)
+		  .then(
+		    function(response) 
+		    {
+		      
+		      if (response.status !== 200) {
+		        console.log('Looks like there was a problem. Status Code: ' +
+		          response.status);
+		        return;
+		      }
+
+		      // Examine the text in the response
+		      response.json().then(function(data) 
+		      {
+		      	    var foundID = false
+
+		      		avgPTS[data["data"]["0"]["player_id"]] = data["data"]["0"]["pts"]
+
+				    console.log(data["data"]["0"]["player_id"])
+				    while(foundID == false)
+				    {
+				    	console.log("IN " + data["data"]["0"]["player_id"])
+				    	if(counter == numOfPlayers3 + 1)
+				    	{
+				    		counter = 0;
+				    	}
+					    if(data["data"]["0"]["player_id"] == document.getElementById("myTable").rows[counter].cells[0].innerHTML)
+					    {
+
+					    	document.getElementById("myTable").rows[counter].cells[2].innerHTML = "PPG: " + avgPTS[data["data"]["0"]["player_id"]]
+					    	foundID = true
+					    }
+
+						counter++
+					}
+
+
+		      });
+		    }
+		  )
+		  .catch(function(err) {
+		    console.log('Fetch Error :-S', err);
+		  });
+
+
+		  //Get player's live stats (WAIT FOR SEASON TO START)
+		  var url2 = "https://www.balldontlie.io/api/v1/stats?seasons[]=2019&player_ids[]=" + result + "&postseason=false";
+
+		  fetch(url2)
+		  .then(
+		    function(response) 
+		    {
+		      
+		      if (response.status !== 200) {
+		        console.log('Looks like there was a problem. Status Code: ' +
+		          response.status);
+		        return;
+		      }
+		  	  // Examine the text in the response
+		      response.json().then(function(data) 
+		      {
+		      		console.log(data)
+		      	    
+
+
+		      });
+		    }
+		  )
+		  .catch(function(err) {
+		    console.log('Fetch Error :-S', err);
+		  });
+
+
+
 		});
 	}
 });
+
 
 
 

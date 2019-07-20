@@ -4,9 +4,11 @@
 	"description": "All-in-one basketball fantasy tool",
 	"manifest_version": 2,
 
+	"content_security_policy": "script-src 'self' https://sdk.amazonaws.com/js/aws-sdk-2.481.0.min.js; object-src 'self'",
+
 	//For background.js
 	"permissions": ["http://localhost/*","declarativeContent","storage","activeTab",
-	    "<all_urls>"],
+	    "<all_urls>","https://www.rotoworld.com/*"],
 
 	//For popup.html
 	"browser_action":
@@ -32,5 +34,6 @@
 		"16": "icon16.png",
 		"32": "icon32.png",
 		"48": "icon48.png",
-		"128": "icon128.png"	}
+		"128": "icon128.png"	
+	}
 }
