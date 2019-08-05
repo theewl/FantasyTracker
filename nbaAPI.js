@@ -16,6 +16,8 @@ var firstNameArr = []
 var lastNameArr = []
 var globalCtr = 0;
 var avgPTS = [];
+var csvData2 = new Array();
+var playersTeam = []
 
 
 //Used to get player's ID from local csv file
@@ -64,6 +66,7 @@ function getPlayerID(path, firstName, lastName)
   });
 
 }
+
 
 //Needs to go through database and check for name in webpage, once it finds a name, it will add to roster
 //Add roster to database
@@ -144,6 +147,8 @@ chrome.storage.sync.get(null, function(items)
     numOfPlayers3 = items[allKeys[allKeys.length -1]]
     var counter = 1
     var counter2 = 1
+    var counter3 = 1
+    var counter4 = 1
 	for(var rows = 0; rows < numOfPlayers3; rows++)
 	{
 	  var table = document.getElementById("myTable");
@@ -153,11 +158,14 @@ chrome.storage.sync.get(null, function(items)
 	  var cell3 = row.insertCell(2);
 	  var cell4 = row.insertCell(3);
 	  var cell5 = row.insertCell(4);
+	  var cell6 = row.insertCell(5);
+
 
 	  
 	  cell1.innerHTML = "ID"
 	  cell2.innerHTML = items[allKeys[rows]];
 	  cell3.innerHTML = "Traded!"
+	  cell6.innerHTML = "Team"
 	  players.push(items[allKeys[rows]])
 	}	
 	for(var theCTR = 0; theCTR < numOfPlayers3; theCTR++)
@@ -191,10 +199,10 @@ chrome.storage.sync.get(null, function(items)
 
 		      		avgPTS[data["data"]["0"]["player_id"]] = data["data"]["0"]["pts"]
 
-				    console.log(data["data"]["0"]["player_id"])
+				    //console.log(data["data"]["0"]["player_id"])
 				    while(foundID == false)
 				    {
-				    	console.log("IN " + data["data"]["0"]["player_id"])
+				    	//console.log("IN " + data["data"]["0"]["player_id"])
 				    	if(counter == numOfPlayers3 + 1)
 				    	{
 				    		counter = 0;
@@ -234,8 +242,70 @@ chrome.storage.sync.get(null, function(items)
 		  	  // Examine the text in the response
 		      response.json().then(function(data) 
 		      {
-		      		console.log(data)
+		      		//console.log(data)
 		      	    
+
+
+		      });
+		    }
+		  )
+		  .catch(function(err) {
+		    console.log('Fetch Error :-S', err);
+		  });
+
+		  var url3 = "https://www.balldontlie.io/api/v1/players/" + result;
+		  var gamesCtr = 0
+
+		  //Get player's team
+		  fetch(url3)
+		  .then(
+		    function(response) 
+		    {
+		      
+		      if (response.status !== 200) {
+		        console.log('Looks like there was a problem. Status Code: ' +
+		          response.status);
+		        return;
+		      }
+
+		      // Examine the text in the response
+		      response.json().then(function(data) 
+		      {
+		      		
+		      	    var foundID = false
+
+		      		playersTeam[data["id"]] = data["team"]["full_name"]
+
+				    while(foundID == false)
+				    {
+				    	if(counter3 == numOfPlayers3 + 1)
+				    	{
+				    		counter3 = 0;
+				    	}
+					    if(data["id"] == document.getElementById("myTable").rows[counter3].cells[0].innerHTML)
+					    {
+
+					    	document.getElementById("myTable").rows[counter3].cells[5].innerHTML = playersTeam[data["id"]]
+
+					    	getTeamsPerWeek('nbaSchedule19.csv').then(function(result)
+							{
+								//MAKE DROPDOWN TO SELECT WEEKS TO SEE WEEKLY GAMES PLAYED FOR EACH PLAYER 
+								console.log(result)
+								for(var i in result["week1"]){
+									if(result["week1"][i] == playersTeam[data["id"]])
+									{
+										gamesCtr++
+									}
+								}
+								document.getElementById("myTable").rows[counter4].cells[4].innerHTML = gamesCtr
+								counter4++
+
+							});
+					    	foundID = true
+					    }
+
+						counter3++
+					}
 
 
 		      });
@@ -247,9 +317,89 @@ chrome.storage.sync.get(null, function(items)
 
 
 
+
+
 		});
 	}
 });
+
+/*
+$.ajax({
+  type: "POST",
+  url: 'https://api.hooksdata.io/v1/subscriptions?api_key=_2TufI6CNcxpistjotZiHL0Q__GztMCX7VPyulJ_aMWlbjfNK6xdVQHEicNRRPdIMzE1Mw',
+  data: {
+    
+  "description": "The Verge RSS updates",
+  "alias": "the_verge_rss",
+  "query": "SELECT * FROM RSS('\''https://www.theverge.com'\'')"
+  },
+  success: function(data) {
+    console.log(data);
+    //do something when request is successfull
+  },
+  dataType: "json"
+});
+*/
+
+//Get which teams are playing each week
+function getTeamsPerWeek(path)
+{
+
+		let request = new XMLHttpRequest();  
+		var ctr = 0
+		var currDay = ''
+		var teamsPlaying = []
+		var teamsPlayingObj = {}
+		var week = 1
+	return new Promise(function(resolve, reject)
+	{
+		request.onload = function() 
+		{
+ 			//Converts csv file into an array
+			var jsonObject = request.responseText.split(/\r?\n|\r/);
+			//console.log(jsonObject)
+
+			for (var i = 0; i < jsonObject.length; i++) 
+			{
+			  csvData2.push(jsonObject[i].split(','));
+			}
+
+			currDay = csvData2[1][0].substring(8,10)
+			console.log(currDay)
+
+			// Retrived data from csv file content
+			for (var i = 1; i < jsonObject.length; i++) 
+			{
+
+				//Check each week and add teams that are playing that week to array
+				if(currDay != csvData2[i][0].substring(8,10))
+				{
+					teamsPlayingObj["week" + week] = teamsPlaying
+					currDay = csvData2[i][0].substring(8,10)
+					teamsPlaying = []
+					week++
+
+				}
+				teamsPlaying.push(csvData2[i][1])
+				teamsPlaying.push(csvData2[i][2])
+				
+			}
+			resolve(teamsPlayingObj)
+			
+
+			
+		};
+
+		request.onerror = () => 
+		{
+	  		console.log("error")
+		};
+		request.open("GET", path);   
+		request.send(); 
+	});
+}
+
+
 
 
 
