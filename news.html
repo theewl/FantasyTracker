@@ -49,20 +49,27 @@ li a:hover:not(.active) {
 <body>
 
 <button id="addTeamBtn">Add Fantasy Team</button>
+<select id = "selectWeek">
+  <option>Select a week</option>
+  <option value="week1">Week 1</option>
+  <option value="week2">Week 2</option>
+  <option value="week3">Week 3</option>
+  <option value="week4">Week 4</option>
+</select>
 
 <h2>YOUR TEAM</h2>
-<table id="myTable">
-	<tr>
-    <td><b>ID<b></td>
-		<td><b>Names<b></td>
-		<td><b>Stats</b></td>
-		<td><b>Games</b></td>
-    <td><b>Live Stats</b></td>
-    <td><b>Team</b></td>
-
-
-	</tr>
-</table>
+<table id = "out" style="width:100%">
+    <thead>
+          <th align="left">ID</th>
+          <th align="left">Names</th>
+          <th align="left">Stats</th>
+          <th align="left">Live Stats</th>
+          <th align="left">Games</th>
+          <th align="left">Team</th>
+    </thead>
+    <tbody id="tb">
+    </tbody>
+</table>   
 
 </body>
 <script type="text/javascript" src="jquery-3.4.1.min.js"></script>

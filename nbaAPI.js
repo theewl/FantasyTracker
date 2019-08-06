@@ -87,6 +87,7 @@ document.getElementById("addTeamBtn").addEventListener('click', () =>
 	    code: '(' + modifyDOM + ')();' //argument here is a string but function.toString() returns function's code
 	}, (results) => 
 	{
+		console.log(results[0])
 		//Get player's name from fantasy team roster
 		var index = 0
 		//Find number of players in roster
@@ -138,190 +139,202 @@ document.getElementById("addTeamBtn").addEventListener('click', () =>
 	});
 });
 
+//CHECK ADD TEAM BUTTON AND ADD TABLE HEADER WHENEVER A NEW WEEK IS CHOSEN
+var table = document.getElementById("tb");
 
-//chrome.storage.sync.clear()
-chrome.storage.sync.get(null, function(items) 
-{
+//myFunction - checks for statistics and information for every player on your team
+function myFunction(){
 
-    var allKeys = Object.keys(items);
-    numOfPlayers3 = items[allKeys[allKeys.length -1]]
-    var counter = 1
-    var counter2 = 1
-    var counter3 = 1
-    var counter4 = 1
-	for(var rows = 0; rows < numOfPlayers3; rows++)
+	//Clear database if needed
+	//chrome.storage.sync.clear()
+
+	//Get player's names and total # of players on team
+	chrome.storage.sync.get(null, function(items) 
 	{
-	  var table = document.getElementById("myTable");
-	  var row = table.insertRow(-1);
-	  var cell1 = row.insertCell(0);
-	  var cell2 = row.insertCell(1);
-	  var cell3 = row.insertCell(2);
-	  var cell4 = row.insertCell(3);
-	  var cell5 = row.insertCell(4);
-	  var cell6 = row.insertCell(5);
+	    var allKeys = Object.keys(items);
+	    numOfPlayers3 = items[allKeys[allKeys.length -1]]
+	    var counter = 0
+	    var counter2 = 0
+	    var counter3 = 0
+	    var counter4 = 0
+	    //Clears table body when new week is selected
+	    $('#tb').empty()
 
-
-	  
-	  cell1.innerHTML = "ID"
-	  cell2.innerHTML = items[allKeys[rows]];
-	  cell3.innerHTML = "Traded!"
-	  cell6.innerHTML = "Team"
-	  players.push(items[allKeys[rows]])
-	}	
-	for(var theCTR = 0; theCTR < numOfPlayers3; theCTR++)
-	{
-		players_first = players[theCTR].substr(0, players[theCTR].indexOf(' '))
-		players_last = players[theCTR].substr(players[theCTR].indexOf(' ') + 1, players[theCTR].length - 1)
-		//Get player's ID and any information about them
-		getPlayerID('NBA_Data.csv', players_first, players_last).then(function(result)
+	    //Adds rows & cells to table body
+		for(var rows = 0; rows < numOfPlayers3; rows++)
 		{
-			var url = 'https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=' + result
-			document.getElementById("myTable").rows[counter2].cells[0].innerHTML = result
-			counter2++
-			//console.log(result)
+		  var row = table.insertRow(-1);
+		  var cell1 = row.insertCell(0);
+		  var cell2 = row.insertCell(1);
+		  var cell3 = row.insertCell(2);
+		  var cell4 = row.insertCell(3);
+		  var cell5 = row.insertCell(4);
+		  var cell6 = row.insertCell(5);
 
-		  //Get player's season averages
-		  fetch(url)
-		  .then(
-		    function(response) 
-		    {
-		      
-		      if (response.status !== 200) {
-		        console.log('Looks like there was a problem. Status Code: ' +
-		          response.status);
-		        return;
-		      }
+		  
+		  cell1.innerHTML = "ID"
+		  cell2.innerHTML = items[allKeys[rows]];
+		  cell3.innerHTML = "Traded!"
+		  cell6.innerHTML = "Team"
+		  players.push(items[allKeys[rows]])
+		}	
 
-		      // Examine the text in the response
-		      response.json().then(function(data) 
-		      {
-		      	    var foundID = false
+		//Get stats and info for players
+		for(var theCTR = 0; theCTR < numOfPlayers3; theCTR++)
+		{
+			players_first = players[theCTR].substr(0, players[theCTR].indexOf(' '))
+			players_last = players[theCTR].substr(players[theCTR].indexOf(' ') + 1, players[theCTR].length - 1)
 
-		      		avgPTS[data["data"]["0"]["player_id"]] = data["data"]["0"]["pts"]
+			//Get player's ID and any information about them
+			getPlayerID('NBA_Data.csv', players_first, players_last).then(function(result)
+			{
+			  //Get player's season averages
+			  var url = 'https://www.balldontlie.io/api/v1/season_averages?season=2018&player_ids[]=' + result
+			  document.getElementById("tb").rows[counter2].cells[0].innerHTML = result
+			  counter2++
 
-				    //console.log(data["data"]["0"]["player_id"])
-				    while(foundID == false)
-				    {
-				    	//console.log("IN " + data["data"]["0"]["player_id"])
-				    	if(counter == numOfPlayers3 + 1)
-				    	{
-				    		counter = 0;
-				    	}
-					    if(data["data"]["0"]["player_id"] == document.getElementById("myTable").rows[counter].cells[0].innerHTML)
+			  fetch(url)
+			  .then(
+			    function(response) 
+			    {
+			      
+			      if (response.status !== 200) {
+			        console.log('Looks like there was a problem. Status Code: ' +
+			          response.status);
+			        return;
+			      }
+
+			      // Examine the text in the response
+			      response.json().then(function(data) 
+			      {
+			      	    var foundID = false
+
+			      		avgPTS[data["data"]["0"]["player_id"]] = data["data"]["0"]["pts"]
+
+					    //console.log(data["data"]["0"]["player_id"])
+					    while(foundID == false)
 					    {
+					    	//console.log("IN " + data["data"]["0"]["player_id"])
+					    	if(counter == numOfPlayers3 + 1)
+					    	{
+					    		counter = 0;
+					    	}
+						    if(data["data"]["0"]["player_id"] == document.getElementById("tb").rows[counter].cells[0].innerHTML)
+						    {
 
-					    	document.getElementById("myTable").rows[counter].cells[2].innerHTML = "PPG: " + avgPTS[data["data"]["0"]["player_id"]]
-					    	foundID = true
-					    }
+						    	document.getElementById("tb").rows[counter].cells[2].innerHTML = "PPG: " + avgPTS[data["data"]["0"]["player_id"]]
+						    	foundID = true
+						    }
 
-						counter++
-					}
-
-
-		      });
-		    }
-		  )
-		  .catch(function(err) {
-		    console.log('Fetch Error :-S', err);
-		  });
-
-
-		  //Get player's live stats (WAIT FOR SEASON TO START)
-		  var url2 = "https://www.balldontlie.io/api/v1/stats?seasons[]=2019&player_ids[]=" + result + "&postseason=false";
-
-		  fetch(url2)
-		  .then(
-		    function(response) 
-		    {
-		      
-		      if (response.status !== 200) {
-		        console.log('Looks like there was a problem. Status Code: ' +
-		          response.status);
-		        return;
-		      }
-		  	  // Examine the text in the response
-		      response.json().then(function(data) 
-		      {
-		      		//console.log(data)
-		      	    
+							counter++
+						}
 
 
-		      });
-		    }
-		  )
-		  .catch(function(err) {
-		    console.log('Fetch Error :-S', err);
-		  });
+			      });
+			    }
+			  )
+			  .catch(function(err) {
+			    console.log('Fetch Error :-S', err);
+			  });
 
-		  var url3 = "https://www.balldontlie.io/api/v1/players/" + result;
-		  var gamesCtr = 0
 
-		  //Get player's team
-		  fetch(url3)
-		  .then(
-		    function(response) 
-		    {
-		      
-		      if (response.status !== 200) {
-		        console.log('Looks like there was a problem. Status Code: ' +
-		          response.status);
-		        return;
-		      }
+			  //Get player's live stats (WAIT FOR SEASON TO START)
+			  var url2 = "https://www.balldontlie.io/api/v1/stats?seasons[]=2019&player_ids[]=" + result + "&postseason=false";
 
-		      // Examine the text in the response
-		      response.json().then(function(data) 
-		      {
-		      		
-		      	    var foundID = false
+			  fetch(url2)
+			  .then(
+			    function(response) 
+			    {
+			      
+			      if (response.status !== 200) {
+			        console.log('Looks like there was a problem. Status Code: ' +
+			          response.status);
+			        return;
+			      }
+			  	  // Examine the text in the response
+			      response.json().then(function(data) 
+			      {
+			      		//console.log(data)
+			      	    
 
-		      		playersTeam[data["id"]] = data["team"]["full_name"]
 
-				    while(foundID == false)
-				    {
-				    	if(counter3 == numOfPlayers3 + 1)
-				    	{
-				    		counter3 = 0;
-				    	}
-					    if(data["id"] == document.getElementById("myTable").rows[counter3].cells[0].innerHTML)
+			      });
+			    }
+			  )
+			  .catch(function(err) {
+			    console.log('Fetch Error :-S', err);
+			  });
+
+			  //Get player's team
+			  var url3 = "https://www.balldontlie.io/api/v1/players/" + result;
+			  var gamesCtr = 0
+
+			  fetch(url3)
+			  .then(
+			    function(response) 
+			    {
+			      
+			      if (response.status !== 200) {
+			        console.log('Looks like there was a problem. Status Code: ' +
+			          response.status);
+			        return;
+			      }
+
+			      // Examine the text in the response
+			      response.json().then(function(data) 
+			      {
+			      		
+			      	    var foundID = false
+
+			      		playersTeam[data["id"]] = data["team"]["full_name"]
+
+					    while(foundID == false)
 					    {
+					    	if(counter3 == numOfPlayers3 + 1)
+					    	{
+					    		counter3 = 0;
+					    	}
+						    if(data["id"] == document.getElementById("tb").rows[counter3].cells[0].innerHTML)
+						    {
 
-					    	document.getElementById("myTable").rows[counter3].cells[5].innerHTML = playersTeam[data["id"]]
-
-					    	getTeamsPerWeek('nbaSchedule19.csv').then(function(result)
-							{
-								//MAKE DROPDOWN TO SELECT WEEKS TO SEE WEEKLY GAMES PLAYED FOR EACH PLAYER 
-								console.log(result)
-								for(var i in result["week1"]){
-									if(result["week1"][i] == playersTeam[data["id"]])
-									{
-										gamesCtr++
+						    	document.getElementById("tb").rows[counter3].cells[5].innerHTML = playersTeam[data["id"]]
+						    	
+						    	getTeamsPerWeek('nbaSchedule19.csv').then(function(result)
+								{
+									//MAKE DROPDOWN TO SELECT WEEKS TO SEE WEEKLY GAMES PLAYED FOR EACH PLAYER 
+									//console.log(result)
+									for(var i in result[document.getElementById("selectWeek").value]){
+										if(result[document.getElementById("selectWeek").value][i] == playersTeam[data["id"]])
+										{
+											gamesCtr++
+										}
 									}
-								}
-								document.getElementById("myTable").rows[counter4].cells[4].innerHTML = gamesCtr
-								counter4++
+									document.getElementById("tb").rows[counter4].cells[4].innerHTML = gamesCtr
+									counter4++
 
-							});
-					    	foundID = true
-					    }
+								});
+						    	foundID = true
+						    }
 
-						counter3++
-					}
+							counter3++
+						}
 
 
-		      });
-		    }
-		  )
-		  .catch(function(err) {
-		    console.log('Fetch Error :-S', err);
-		  });
-
+			      });
+			    }
+			  )
+			  .catch(function(err) {
+			    console.log('Fetch Error :-S', err);
+			  });
 
 
 
 
-		});
-	}
-});
+
+			});
+		}
+	});
+}
 
 /*
 $.ajax({
@@ -370,7 +383,6 @@ function getTeamsPerWeek(path)
 			// Retrived data from csv file content
 			for (var i = 1; i < jsonObject.length; i++) 
 			{
-
 				//Check each week and add teams that are playing that week to array
 				if(currDay != csvData2[i][0].substring(8,10))
 				{
@@ -386,8 +398,6 @@ function getTeamsPerWeek(path)
 			}
 			resolve(teamsPlayingObj)
 			
-
-			
 		};
 
 		request.onerror = () => 
@@ -398,6 +408,8 @@ function getTeamsPerWeek(path)
 		request.send(); 
 	});
 }
+//Event listener for when week dropdown
+document.getElementById("selectWeek").addEventListener("change", myFunction);
 
 
 
