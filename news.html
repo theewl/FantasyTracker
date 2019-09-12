@@ -3,6 +3,38 @@
 <head>
 <style>
 
+.select {
+	display: block;
+	  margin:0 auto;
+
+}
+
+.button {
+  display: block;
+  padding: 10px 20px;
+  font-size: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: green;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 9px #999;
+  margin:0 auto;
+  border: 1px solid #000000
+  width: 60px;
+}
+
+.button:hover {background-color: #3e8e41}
+
+.button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
 table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
@@ -43,18 +75,48 @@ li a:hover:not(.active) {
   background-color: #555;
   color: white;
 }
+
+.title {
+  text-align: center;
+	  margin:0 auto;
+}
 </style>
 
 </head>
 <body>
 
-<button id="addTeamBtn">Add Fantasy Team</button>
-<select id = "selectWeek">
+<p class = "title">Fantasy Tracker v1.0</p>
+
+
+<p><button class = "button" id="addTeamBtn">Add Fantasy Team</button><p>
+<select size="4" class = "select" id = "selectWeek">
   <option>Select a week</option>
   <option value="week1">Week 1</option>
   <option value="week2">Week 2</option>
   <option value="week3">Week 3</option>
   <option value="week4">Week 4</option>
+  <option value="week5">Week 5</option>
+  <option value="week6">Week 6</option>
+  <option value="week7">Week 7</option>
+  <option value="week8">Week 8</option>
+  <option value="week9">Week 9</option>
+  <option value="week10">Week 10</option>
+  <option value="week11">Week 11</option>
+  <option value="week12">Week 12</option>
+  <option value="week13">Week 13</option>
+  <option value="week14">Week 14</option>
+  <option value="week15">Week 15</option>
+  <option value="week16">Week 16</option>
+  <option value="week17">Week 17</option>
+  <option value="week18">Week 18</option>
+  <option value="week19">Week 19</option>
+  <option value="week20">Week 20</option>
+  <option value="week21">Week 21</option>
+  <option value="week22">Week 22</option>
+  <option value="week23">Week 23</option>
+  <option value="week24">Week 24</option>
+  <option value="week25">Week 25</option>
+
 </select>
 
 <h2>YOUR TEAM</h2>
@@ -62,8 +124,20 @@ li a:hover:not(.active) {
     <thead>
           <th align="left">ID</th>
           <th align="left">Names</th>
-          <th align="left">Stats</th>
-          <th align="left">Live Stats</th>
+          <th align="left">
+          	<select id = "selectedStat">
+			  <option value="PTS">PTS</option>
+			  <option value="ASTS">ASTS</option>
+			  <option value="REBS">REBS</option>
+			  <option value="STLS">STLS</option>
+			  <option value="BLKS">BLKS</option>
+			  <option value="3PTM">3PTM</option>
+			  <option value="TO">TO</option>
+			  <option value="FGP">FGP</option>
+			  <option value="FTP">FTP</option>
+			</select>
+          </th>
+          <th align="left">Total AVG</th>
           <th align="left">Games</th>
           <th align="left">Team</th>
     </thead>
